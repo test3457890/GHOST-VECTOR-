@@ -76,6 +76,7 @@ jobs:
       - name: Verify container hardening
         run: |
           test "$(docker inspect -f '{{.HostConfig.ReadonlyRootfs}}' ghost-vector-ctf)" = "true"
+          test "$(docker compose port ghost-vector 8080)" = "127.0.0.1:8080"
           docker inspect -f '{{.HostConfig.CapDrop}}' ghost-vector-ctf | grep -qi all
           test "$(docker exec ghost-vector-ctf id -u)" != "0"
           curl -sI localhost:8080/ | grep -qi "content-security-policy: default-src 'none'"
