@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}PHASE 2: SILENT VECTOR{% endblock %}
+{% block body %}
+<h1>SILENT VECTOR</h1>
+<p class="sub">PHASE 2 // NAVIGATION RECOVERY <span class="blink">_</span></p>
+<div class="box"><pre>
+The ghost signal was a handshake. GHOST-01 has opened a second channel
+on the hydrogen line and is sending fragments of its navigation solution.
+
+To bring it home we need FOUR navigation marker codes:
+
+  [V1] SYNC   The satellite keeps returning to one exact frequency.
+  [V2] VECTOR Listen to the rhythm between those returns.
+  [V3] COORD  The star map is darker than it looks.
+  [V4] PRIME  Only the indivisible pulses matter. Count them modulo 127.
+
+Marker codes look like NAV_WORD_WORD_N. When you have all four,
+open HANDSHAKE.SYS.
+</pre></div>
+<a class="btn" href="{{ url_for('download', name='vector_telemetry.csv') }}">DOWNLOAD vector_telemetry.csv</a>
+<a class="btn" href="{{ url_for('download', name='starmap.png') }}">DOWNLOAD starmap.png</a>
+<a class="btn" href="{{ url_for('handshake') }}">OPEN HANDSHAKE.SYS</a>
+{% endblock %}

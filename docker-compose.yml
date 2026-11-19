@@ -1,0 +1,14 @@
+services:
+  ghost-vector:
+    build: .
+    container_name: ghost-vector-ctf
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    env_file:
+      - config/flags.env
+    volumes:
+      - ghost_vector_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  ghost_vector_data:

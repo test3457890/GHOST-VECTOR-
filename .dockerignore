@@ -1,0 +1,12 @@
+.git
+.gitignore
+docs/
+extras/
+tools/
+config/
+*.md
+LICENSE
+setup.sh
+__pycache__/
+*.pyc
+staff-private/

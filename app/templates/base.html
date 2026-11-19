@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}GHOST VECTOR{% endblock %} | AstroSec Recovery Terminal</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='crt.css') }}"></head>
+<body><div class="wrap">
+<div class="nav">ASTROSEC DEEP SPACE RECOVERY TEAM // TERMINAL 7 // <a href="{{ url_for('index') }}">PHASE 1</a>
+{% if unlocked is not defined or unlocked %} // <a href="{{ url_for('vector') }}">PHASE 2</a> // <a href="{{ url_for('handshake') }}">HANDSHAKE.SYS</a>{% endif %}</div>
+{% block body %}{% endblock %}
+</div>
+<script>
+async function post(url, body) {
+  const r = await fetch(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  if (!r.ok) return {ok: false, message: "ACCESS DENIED (" + r.status + ")"};
+  return r.json();
+}
+function show(el, res) { el.className = "msg " + (res.ok ? "ok" : "bad"); el.textContent = "> " + res.message; }
+</script>
+{% block script %}{% endblock %}
+</body></html>

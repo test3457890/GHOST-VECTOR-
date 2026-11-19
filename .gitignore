@@ -1,0 +1,10 @@
+config/flags.env
+.env
+data/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+staff-private/
+*.zip

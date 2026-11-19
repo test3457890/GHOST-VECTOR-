@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}HANDSHAKE.SYS{% endblock %}
+{% block body %}
+<h1>HANDSHAKE.SYS</h1>
+<p class="sub">FINAL STAGE // ALIGNMENT <span class="blink">_</span></p>
+<div class="box"><pre>
+STEP 1  Enter all four navigation marker codes.
+STEP 2  A judge verifies your work and issues an ALIGNMENT SLATE.
+STEP 3  Use the slate to build the MASTER COORDINATE and transmit it.
+</pre></div>
+<h2>STEP 1: MARKERS</h2>
+<label>V1 SYNC</label><input id="c0" autocomplete="off">
+<label>V2 VECTOR</label><input id="c1" autocomplete="off">
+<label>V3 COORD</label><input id="c2" autocomplete="off">
+<label>V4 PRIME</label><input id="c3" autocomplete="off">
+<button onclick="lock()">LOCK MARKERS</button>
+<div id="m1" class="msg {% if markers_ok %}ok{% endif %}">{% if markers_ok %}&gt; Markers already locked for this session.{% endif %}</div>
+
+<h2>STEP 3: MASTER COORDINATE</h2>
+{% if not configured %}<p class="warn">&gt; Transmitter offline until staff configure the master coordinate.</p>{% endif %}
+<label>MASTER COORDINATE</label><input id="coord" autocomplete="off">
+<button onclick="tx()">TRANSMIT</button>
+<div id="m2" class="msg"></div>
+{% endblock %}
+{% block script %}
+<script>
+async function lock() {
+  const codes = [0,1,2,3].map(i => document.getElementById("c" + i).value);
+  const m = document.getElementById("m1"); m.className = "msg warn"; m.textContent = "> aligning...";
+  const res = await post("/api/handshake", {codes});
+  let s = res.message;
+  if (res.results) s += "  [" + res.results.map((r,i) => "V" + (i+1) + (r ? ":OK" : ":X")).join(" ") + "]";
+  show(m, {ok: res.ok, message: s});
+}
+async function tx() {
+  const m = document.getElementById("m2"); m.className = "msg warn"; m.textContent = "> transmitting...";
+  show(m, await post("/api/transmit", {coordinate: document.getElementById("coord").value}));
+}
+</script>
+{% endblock %}
