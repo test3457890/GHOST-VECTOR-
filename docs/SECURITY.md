@@ -28,6 +28,7 @@
 ### The container
 | Protection | Setting |
 |---|---|
+| Network binding | Compose publishes the terminal on host loopback by default. Event access requires an explicit private `HOST_BIND_IP` |
 | Non-root | Runs as the `ctf` user |
 | Read-only filesystem | `read_only: true`. Only the data volume and a small `/tmp` can be written |
 | No Linux capabilities | `cap_drop: ALL` and `no-new-privileges` |
