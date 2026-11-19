@@ -34,12 +34,13 @@
 | Resource caps | 256 MB memory, 128 processes, 1 CPU |
 | Request limits | gunicorn caps the request line and header count |
 | Pinned dependencies | Exact versions in `app/requirements.txt`, audited with pip-audit |
+| Patched and trimmed image | Debian security updates applied at build time, and build-only tools (setuptools, wheel) removed |
 
 ## Automated checks (CI)
 
 - **bandit:** static security analysis of the Python code.
 - **pip-audit:** known vulnerabilities in the dependencies.
-- **Trivy:** scans the built Docker image and fails on fixable HIGH or CRITICAL issues.
+- **Trivy:** scans the built Docker image and fails on fixable HIGH or CRITICAL issues. One entry is ignored in `.trivyignore` with a written reason: a setuptools CVE reported from the base image's build history, while CI separately proves setuptools isn't in the image.
 - **Spoiler guard:** fails if a plain-text walkthrough, solver, staff folder or `config/flags.env` is ever tracked.
 - **Hardening check:** confirms the running container is read-only, has dropped all capabilities, isn't running as root, and sends the security headers.
 - **Unit tests:** cover the CSP, headers, rate limits, size caps, input validation, cookie flags and path traversal.
