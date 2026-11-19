@@ -4,6 +4,10 @@
 
 > **Prototype / proof-of-concept demo by Stuff Studios.** Built for AstroSec training events and classrooms. This isn't a hardened production service.
 
+**New here? Start with the [illustrated Setup Guide](docs/SETUP_GUIDE.md).**
+
+![HANDSHAKE.SYS final stage](docs/images/terminal-handshake-locked.png)
+
 GHOST VECTOR is a space-themed Capture The Flag event built for **CTFd**. A lost satellite, **GHOST-01**, has woken up and is broadcasting corrupted telemetry. Players work through three phases:
 
 1. **Phase 1, Ghost Signal:** three flags hidden in a satellite telemetry CSV (data forensics, timing, LSB steganography).
@@ -14,7 +18,8 @@ GHOST VECTOR is a space-themed Capture The Flag event built for **CTFd**. A lost
 
 Yes. Every push runs the [CI workflow](.github/workflows/ci.yml):
 
-- **41 unit tests:** the generator, the terminal, the CTFd pack builder and the repo rules.
+- **Security scans:** bandit, pip-audit, a Trivy image scan, a spoiler guard, and a live check that the container is hardened. See [docs/SECURITY.md](docs/SECURITY.md).
+- **52 unit tests:** the generator, the terminal (including security headers, rate limits and input caps), the CTFd pack builder and the repo rules.
 - **End to end:** builds the Docker image, starts a real **CTFd**, imports all 8 challenges with ctfcli, then plays the whole CTF as a player. That covers downloading the files from CTFd, solving them, submitting every flag, checking that locked challenges unlock, checking hint costs, doing HANDSHAKE.SYS and checking the final score. **32 checks, all passing.**
 
 You can run the same player test against your own CTFd before an event. See [docs/TESTING.md](docs/TESTING.md).
@@ -48,7 +53,7 @@ for d in 0*/; do ctf challenge install "$d"; done
 cd ../.. && python3 tools/ctfd_smoke_test.py --ctfd https://YOUR-CTFD --terminal http://YOUR-HOST:8080 --coordinate YOUR-COORDINATE
 ```
 
-The full walkthrough, including entering challenges by hand without ctfcli, is in **[docs/CTFD_SETUP.md](docs/CTFD_SETUP.md)**.
+Step by step with screenshots: **[docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md)**. Entering challenges by hand without ctfcli: **[docs/CTFD_SETUP.md](docs/CTFD_SETUP.md)**.
 
 ## Learn with GHOST VECTOR
 
@@ -57,15 +62,17 @@ The full walkthrough, including entering challenges by hand without ctfcli, is i
 | [Learning Guide](docs/LEARNING_GUIDE.md) | Players and instructors: concepts, tools, practice exercises | No |
 | [Player Briefing](docs/PLAYER_BRIEFING.md) | Players: story, rules, how to play | No |
 | [Hint Book](docs/HINTS.md) | Players who are stuck: 3 hints per challenge | Light |
-| [Walkthrough](docs/WALKTHROUGH.md) | After the event, or to learn the full method | **Yes** |
+| Walkthrough and solver | Instructors and staff: inside the encrypted staff pack (see below) | **Yes** |
 
-**Practice alone without CTFd:** run `./setup.sh` and open `http://localhost:8080`. Phase 1 and 2 files download from the terminal, and the walkthrough and `solutions/solve_all.py` let you check yourself.
+**Practice alone without CTFd:** run `./setup.sh` and open `http://localhost:8080`. Phase 1 and 2 files download straight from the terminal.
 
 ## Organizer docs
 
 | Doc | What's in it |
 |---|---|
+| [Setup Guide](docs/SETUP_GUIDE.md) | **Start here.** Every step with screenshots |
 | [CTFd Setup](docs/CTFD_SETUP.md) | Build the pack, import it, recommended CTFd settings, event day |
+| [Security](docs/SECURITY.md) | What is locked down and how it's tested |
 | [Deployment](docs/DEPLOYMENT.md) | Docker install, every config setting, troubleshooting |
 | [Testing](docs/TESTING.md) | Unit tests, CI, the pre-event player smoke test |
 | [Architecture](docs/ARCHITECTURE.md) | How the generator, terminal and CTFd fit together |
@@ -81,7 +88,9 @@ GHOST-VECTOR-/
     build_ctfd.py         Builds the ctfcli challenge pack from your flags
     ctfd_smoke_test.py    Plays the whole CTF against your CTFd (32 checks)
     set_prize_key.py      Hashes the master coordinate for the final stage
-  solutions/solve_all.py  Reference solver (spoilers)
+    staff_vault.py        Unlocks and locks the encrypted staff pack
+  staff/
+    ghost-vector-staff.7z AES-256 encrypted: walkthrough, solver, judge guide, flags
   tests/                  pytest suite and CI helpers
   docs/                   Learning guide, walkthrough, hints, CTFd setup and more
   extras/                 Optional CosmoLog breadcrumb
@@ -89,11 +98,11 @@ GHOST-VECTOR-/
   Dockerfile, docker-compose.yml, entrypoint.sh, setup.sh
 ```
 
-## Keeping answers secret
+## Keeping answers locked up
 
-- Real flags live only in `config/flags.env` and `ctfd/build/`. Git ignores both. **No real flag is ever in this repo.**
-- The walkthrough and solver teach the **method** and work with whatever flags you configure. For a competitive event, **set new flags and a new `SEED`**, and rely on the judge-verified final stage.
-- The judge guide and slate cards are kept in a separate staff package, outside this repo.
+- **No real flag is ever in this repo.** Flags live only in `config/flags.env` and `ctfd/build/`, and git ignores both.
+- **All spoilers are encrypted.** The walkthrough, solver, judge guide, slate card and a tested flag set live only in `staff/ghost-vector-staff.7z` (AES-256 with encrypted file names). Open it with `python3 tools/staff_vault.py unlock` or with 7-Zip. Older plain-text copies were scrubbed from the git history.
+- **CI enforces it:** the build fails if a spoiler or a flags file is ever committed in plain text.
 
 ## License
 

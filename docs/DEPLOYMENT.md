@@ -30,6 +30,9 @@ nano config/flags.env
 | `PHASE2_GATE` | `open` (default, best with CTFd) or `gated` (a Phase 1 flag submitted on the terminal unlocks Phase 2, for use without CTFd) |
 | `SECRET_KEY` | Long random string used to sign sessions |
 | `REGENERATE` | Set to `1` for one start to rebuild the data |
+| `RATE_LIMIT`, `RATE_WINDOW` | Attempts allowed per client per window on each check endpoint (default 12 per 60 s) |
+| `COOKIE_SECURE` | `1` when served over HTTPS, so the session cookie is HTTPS only |
+| `TRUST_PROXY` | `1` when behind a reverse proxy (nginx, Caddy), so rate limits see the real client IP |
 
 Flags are checked without regard to case.
 

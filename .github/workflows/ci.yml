@@ -5,7 +5,33 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+env:
+  # Optional repo secret. When set, CI unlocks the encrypted staff pack and also
+  # runs the solver checks. Without it those checks are skipped, never exposed.
+  STAFF_PACK_PASSWORD: ${{ secrets.STAFF_PACK_PASSWORD }}
+
 jobs:
+  security:
+    name: Security scans
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install bandit pip-audit
+      - name: Static analysis (bandit)
+        run: bandit -r app tools
+      - name: Dependency vulnerabilities (pip-audit)
+        run: pip-audit -r app/requirements.txt
+      - name: No plaintext spoilers in the repo
+        run: |
+          ! git ls-files | grep -E '^(solutions/|staff-unlocked/|docs/WALKTHROUGH.md|config/flags.env)'
+          head -c 6 staff/ghost-vector-staff.7z | od -An -tx1 | grep -q "37 7a bc af 27 1c"
+
   tests:
     name: Unit tests
     runs-on: ubuntu-latest
@@ -36,12 +62,33 @@ jobs:
           HASH=$(python -c "import hashlib,os;print(hashlib.sha256(os.environ['COORD'].encode()).hexdigest())")
           sed -i "s/^PRIZE_KEY_HASH=.*/PRIZE_KEY_HASH=$HASH/" config/flags.env
 
-      - name: Build and start the terminal container
+      - name: Unlock staff pack (only if the secret is set)
+        if: env.STAFF_PACK_PASSWORD != ''
+        run: python tools/staff_vault.py unlock
+
+      - name: Build and start the hardened terminal container
         run: |
           ./setup.sh
           for i in $(seq 1 30); do curl -sf localhost:8080/health && break; sleep 2; done
           curl -sf localhost:8080/health
           docker ps
+
+      - name: Verify container hardening
+        run: |
+          test "$(docker inspect -f '{{.HostConfig.ReadonlyRootfs}}' ghost-vector-ctf)" = "true"
+          docker inspect -f '{{.HostConfig.CapDrop}}' ghost-vector-ctf | grep -qi all
+          test "$(docker exec ghost-vector-ctf id -u)" != "0"
+          curl -sI localhost:8080/ | grep -qi "content-security-policy: default-src 'none'"
+          curl -sI localhost:8080/ | grep -qi "x-frame-options: DENY"
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/download/.hashes.json)" = "404"
+
+      - name: Scan the image for known vulnerabilities (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ghost-vector-ctf:local
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
 
       - name: Start a blank CTFd
         run: |

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.0 (2026-11-18)
+
+- **Locked up:** the walkthrough, solver, judge guide, slate card and tested flags are now stored only in `staff/ghost-vector-staff.7z` (AES-256, encrypted file names). `tools/staff_vault.py` unlocks and locks it. The plain-text copies and the tested marker codes were scrubbed from the git history.
+- **Hardened terminal:** a strict CSP with no inline script, security headers, per-client rate limits, JSON-only APIs with size and input caps, HttpOnly and SameSite=Strict cookies, weak-key protection, and JSON error pages.
+- **Hardened container:** read-only filesystem, all capabilities dropped, no-new-privileges, memory, process and CPU caps, pinned and audited dependencies (Pillow 13.0.0).
+- **CI security job:** bandit, pip-audit, a Trivy image scan, a spoiler guard and a live hardening check.
+- **Illustrated Setup Guide** with 16 real screenshots, plus a new Security doc.
+- The example config now uses placeholder marker codes (`NAV_CHANGEME_...`).
+- 52 unit tests. Solver tests skip while the staff pack is locked.
+
 ## 2.0.0 (2026-11-18)
 
 - **CTFd integration:** `tools/build_ctfd.py` builds a ctfcli pack (8 challenges, hints with costs, prerequisites, files, optional dynamic scoring) and a manual entry sheet.

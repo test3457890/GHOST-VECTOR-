@@ -23,7 +23,7 @@ Usage:
 import argparse
 import os
 import shutil
-import subprocess
+import subprocess  # nosec B404
 import sys
 from pathlib import Path
 
@@ -251,7 +251,7 @@ def main():
     data = out / "_data"
     data.mkdir(parents=True)
     run_env = dict(os.environ, **env, OUTPUT_DIR=str(data))
-    subprocess.run([sys.executable, str(GENERATOR)], env=run_env, check=True)
+    subprocess.run([sys.executable, str(GENERATOR)], env=run_env, check=True)  # nosec B603
 
     chals = challenges(env)
     for c in chals:

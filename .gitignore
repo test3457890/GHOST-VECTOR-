@@ -11,3 +11,6 @@ staff-private/
 ctfd/build/
 token.txt
 .pytest_cache/
+staff-unlocked/
+staff/*.tmp
+staff-unlocked.partial/

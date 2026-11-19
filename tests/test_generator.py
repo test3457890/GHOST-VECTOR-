@@ -5,7 +5,7 @@ import os
 import pytest
 from PIL import Image
 
-from conftest import TEST_ENV, generate, solve
+from conftest import TEST_ENV, generate, needs_solver, solve
 
 FILES = ["ghost_telemetry.csv", "vector_telemetry.csv", "starmap.png"]
 
@@ -27,6 +27,7 @@ def test_new_seed_changes_files(tmp_path):
         assert (a / f).read_bytes() != (b / f).read_bytes(), f
 
 
+@needs_solver
 def test_solver_recovers_every_flag(data_dir):
     got = solve(data_dir)
     assert got["G1"] == TEST_ENV["FLAG_G1"]
@@ -37,6 +38,7 @@ def test_solver_recovers_every_flag(data_dir):
     assert got["V4"] == TEST_ENV["CODE_V4"]
 
 
+@needs_solver
 @pytest.mark.parametrize("seed", ["1", "42", "1420", "9999", "31337"])
 def test_solvable_for_many_seeds(tmp_path, seed):
     d = generate(tmp_path, SEED=seed, FLAG_G1="AstroSec{s33d_" + seed + "}",

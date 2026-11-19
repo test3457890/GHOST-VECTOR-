@@ -26,16 +26,6 @@ Recover any signature and transmit it below to open the vector channel.
 {% endif %}
 <label for="flag">SIGNATURE (AstroSec{...})</label>
 <input id="flag" autocomplete="off" placeholder="AstroSec{...}">
-<button onclick="go()">TRANSMIT</button>
+<button id="send-uplink" type="button">TRANSMIT</button>
 <div id="m" class="msg"></div>
-{% endblock %}
-{% block script %}
-<script>
-async function go() {
-  const m = document.getElementById("m"); m.className = "msg warn"; m.textContent = "> transmitting...";
-  const res = await post("/api/uplink", {flag: document.getElementById("flag").value});
-  show(m, res);
-  if (res.ok) setTimeout(() => location.href = res.next, 1500);
-}
-</script>
 {% endblock %}

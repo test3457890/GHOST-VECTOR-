@@ -1,6 +1,6 @@
 # Learning Guide
 
-GHOST VECTOR is built to **teach**, not just to score. This guide explains the skills behind every challenge, the tools to use and how to practice. It contains **no flags and no direct answers**. For the full solutions, see [WALKTHROUGH.md](WALKTHROUGH.md) (spoilers).
+GHOST VECTOR is built to **teach**, not just to score. This guide explains the skills behind every challenge, the tools to use and how to practice. It contains **no flags and no direct answers**. Instructors: the full walkthrough and solver are in the encrypted staff pack (`python3 tools/staff_vault.py unlock`).
 
 > Prototype / proof-of-concept demo by Stuff Studios.
 
@@ -130,7 +130,7 @@ You can run GHOST VECTOR alone to learn. No event is needed.
 
 - With the default `PHASE2_GATE=open`, both phases download straight from the terminal at `http://localhost:8080`.
 - Change `SEED` and the flags, then run `docker compose down -v && ./setup.sh` to get a fresh puzzle you haven't seen.
-- Check your answers with [the reference solver](../solutions/solve_all.py) only after you've tried.
+- Check your answers by submitting them on the terminal: HANDSHAKE.SYS marks each marker OK or X.
 
 ## Extra challenges after you finish
 
@@ -145,4 +145,4 @@ You can run GHOST VECTOR alone to learn. No event is needed.
 - **Teams:** 2 or 3 people per team works best.
 - **Debrief:** have each team explain one challenge to the room. Teaching it is how the skill sticks.
 - **Fresh puzzle each time:** change `SEED` and the flags so last term's answers don't work.
-- **Answers and judging:** see [WALKTHROUGH.md](WALKTHROUGH.md) and the staff package.
+- **Answers and judging:** unlock the staff pack (`python3 tools/staff_vault.py unlock`) for the walkthrough, solver and judge guide. Use the walkthrough for your debrief.

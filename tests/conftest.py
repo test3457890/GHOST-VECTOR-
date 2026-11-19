@@ -35,9 +35,25 @@ def generate(out_dir, **overrides):
     return Path(out_dir)
 
 
+SOLVER = ROOT / "staff-unlocked" / "solvers" / "solve_all.py"
+
+
+def _ensure_solver():
+    """Unlock the staff pack automatically when STAFF_PACK_PASSWORD is set."""
+    if not SOLVER.exists() and os.environ.get("STAFF_PACK_PASSWORD"):
+        from staff_vault import unlock
+        unlock(password=os.environ["STAFF_PACK_PASSWORD"])
+    return SOLVER.exists()
+
+
+HAVE_SOLVER = _ensure_solver()
+needs_solver = pytest.mark.skipif(
+    not HAVE_SOLVER, reason="solver is in the encrypted staff pack; set STAFF_PACK_PASSWORD to run")
+
+
 def solve(data_dir):
     """Run the reference solver and return {'G1': ..., ...}."""
-    out = subprocess.run([sys.executable, str(ROOT / "solutions" / "solve_all.py"), str(data_dir)],
+    out = subprocess.run([sys.executable, str(SOLVER), str(data_dir)],
                          capture_output=True, text=True, check=True, cwd=data_dir).stdout
     return dict(line.split(" ", 1) for line in out.strip().splitlines() if " " in line)
 

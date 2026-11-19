@@ -1,6 +1,7 @@
 services:
   ghost-vector:
     build: .
+    image: ghost-vector-ctf:local
     container_name: ghost-vector-ctf
     ports:
       - "${HOST_PORT:-8080}:8080"
@@ -9,6 +10,18 @@ services:
     volumes:
       - ghost_vector_data:/app/data
     restart: unless-stopped
+    # Hardening: read-only filesystem, no Linux capabilities, no privilege escalation,
+    # and resource caps so one container cannot starve the host.
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    pids_limit: 128
+    cpus: 1.0
 
 volumes:
   ghost_vector_data:

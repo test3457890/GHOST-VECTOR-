@@ -110,3 +110,63 @@ def test_no_flags_in_any_page(client):
     for k, v in TEST_ENV.items():
         if k.startswith(("FLAG_", "CODE_")):
             assert v not in html
+
+
+# ------------------------------------------------------------------ hardening
+
+def test_security_headers(client):
+    r = client.get("/")
+    csp = r.headers["Content-Security-Policy"]
+    assert "script-src 'self'" in csp and "unsafe-inline" not in csp
+    assert "frame-ancestors 'none'" in csp
+    assert r.headers["X-Frame-Options"] == "DENY"
+    assert r.headers["X-Content-Type-Options"] == "nosniff"
+    assert r.headers["Referrer-Policy"] == "no-referrer"
+
+
+def test_no_inline_script_in_pages(client):
+    unlock(client)
+    for page in ["/", "/vector", "/handshake"]:
+        html = client.get(page).data.decode()
+        assert "onclick" not in html and "<script>" not in html, page
+
+
+def test_api_requires_json(client):
+    r = client.post("/api/uplink", data={"flag": TEST_ENV["FLAG_G1"]})
+    assert r.status_code == 415 and r.get_json()["ok"] is False
+
+
+def test_body_size_cap(client):
+    r = client.post("/api/uplink", json={"flag": "A" * 5000})
+    assert r.status_code == 413
+
+
+def test_input_type_and_length_checked(client):
+    assert client.post("/api/uplink", json={"flag": ["x"]}).status_code == 400
+    assert client.post("/api/uplink", json={"flag": "A" * 201}).status_code == 400
+    assert client.post("/api/uplink", json=["not", "a", "dict"]).status_code == 400
+
+
+def test_rate_limit(monkeypatch, data_dir):
+    c = make_client(monkeypatch, data_dir, RATE_LIMIT="3", RATE_WINDOW="60")
+    codes = [c.post("/api/uplink", json={"flag": "nope"}).status_code for _ in range(5)]
+    assert codes == [200, 200, 200, 429, 429]
+    assert c.post("/api/uplink", json={"flag": "nope"}).get_json()["ok"] is False
+
+
+def test_errors_are_json_without_detail(client):
+    r = client.get("/no-such-page")
+    assert r.status_code == 404 and r.get_json() == {"ok": False, "message": "NOT FOUND"}
+
+
+def test_session_cookie_flags(client):
+    r = client.post("/api/uplink", json={"flag": TEST_ENV["FLAG_G1"]})
+    cookie = r.headers.get("Set-Cookie", "")
+    assert "gv_session=" in cookie and "HttpOnly" in cookie and "SameSite=Strict" in cookie
+
+
+def test_weak_secret_key_replaced(monkeypatch, data_dir):
+    import app as app_module
+    make_client(monkeypatch, data_dir, SECRET_KEY="change-me-to-a-long-random-string")
+    assert app_module.app.secret_key != "change-me-to-a-long-random-string"
+    assert len(app_module.app.secret_key) >= 32

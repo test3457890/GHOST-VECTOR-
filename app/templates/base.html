@@ -8,13 +8,6 @@
 {% if unlocked is not defined or unlocked %} // <a href="{{ url_for('vector') }}">PHASE 2</a> // <a href="{{ url_for('handshake') }}">HANDSHAKE.SYS</a>{% endif %}</div>
 {% block body %}{% endblock %}
 </div>
-<script>
-async function post(url, body) {
-  const r = await fetch(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
-  if (!r.ok) return {ok: false, message: "ACCESS DENIED (" + r.status + ")"};
-  return r.json();
-}
-function show(el, res) { el.className = "msg " + (res.ok ? "ok" : "bad"); el.textContent = "> " + res.message; }
-</script>
-{% block script %}{% endblock %}
+<script src="{{ url_for('static', filename='terminal.js') }}"></script>
+
 </body></html>

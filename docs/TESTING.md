@@ -2,7 +2,11 @@
 
 GHOST VECTOR is tested at three levels. All of them run on every push in [GitHub Actions](../.github/workflows/ci.yml).
 
-## 1. Unit tests (41 tests, about 3 seconds)
+## 0. Security scans
+
+`bandit`, `pip-audit`, a Trivy image scan, a spoiler guard and a live container hardening check. Details are in [SECURITY.md](SECURITY.md).
+
+## 1. Unit tests (52 tests, about 3 seconds)
 
 ```bash
 pip install -r requirements-dev.txt
@@ -14,7 +18,9 @@ python3 -m pytest -v
 | `tests/test_generator.py` | The same seed always gives identical files, a new seed changes them, and every flag can be solved across many seeds and flag sets. Flags never appear in plain text in player files, and the V3 text is really hidden |
 | `tests/test_app.py` | Every terminal route works: Phase 2 locking, wrong or right uplinks, flags not case sensitive, wrapped codes, path traversal and hash-file downloads blocked, partial handshakes, the full final stage, offline mode, judge-only mode, and no flags in any page |
 | `tests/test_build_ctfd.py` | The CTFd pack has 8 challenges in order, 2,050 points, the right flags, prerequisites and hint costs. Its files match the terminal byte for byte, and dynamic mode and config validation work |
-| `tests/test_repo.py` | No em or en dashes in tracked files, `config/flags.env` is never committed, and the example config is valid |
+| `tests/test_repo.py` | No em or en dashes in tracked files, `config/flags.env` and spoilers are never committed in plain text, the staff pack is really encrypted, and the example config is valid |
+
+Six solver tests need the reference solver, which is in the encrypted staff pack. They **skip** while it's locked. Set `STAFF_PACK_PASSWORD` (locally or as a GitHub Actions secret) and they unlock the pack and run automatically. The terminal tests also cover the CSP, security headers, rate limiting, body and input caps, JSON-only APIs, cookie flags and weak-key replacement.
 
 ## 2. End to end in CI (real Docker plus real CTFd)
 
@@ -32,7 +38,7 @@ pip install requests pillow
 python3 tools/ctfd_smoke_test.py --ctfd https://YOUR-CTFD --terminal http://YOUR-TERMINAL:8080 --coordinate YOUR-COORDINATE
 ```
 
-It registers a throwaway player and runs **32 checks**:
+It registers a throwaway player and runs **32 checks** (7 of them use the solver and show SKIP while the staff pack is locked):
 
 - Phase 1 is visible, and Phase 2 and FINAL are hidden at the start
 - files download from CTFd, a wrong flag is rejected, and G1 is accepted

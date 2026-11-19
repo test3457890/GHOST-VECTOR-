@@ -24,7 +24,22 @@ def test_real_config_not_tracked():
     assert "ctfd/build" not in tracked
 
 
+def test_spoilers_not_tracked_in_plain_text():
+    tracked = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True).stdout.split()
+    assert "docs/WALKTHROUGH.md" not in tracked
+    assert not any(p.startswith(("solutions/", "staff-unlocked/")) for p in tracked)
+    assert "staff/ghost-vector-staff.7z" in tracked
+
+
+def test_staff_pack_is_encrypted():
+    raw = (ROOT / "staff" / "ghost-vector-staff.7z").read_bytes()
+    assert raw[:6] == b"7z\xbc\xaf\x27\x1c"
+    for word in [b"WALKTHROUGH", b"STAFF_GUIDE", b"AstroSec{", b"solve_all", b"NAV_"]:
+        assert word not in raw, word
+
+
 def test_example_config_valid():
     env = load_env(ROOT / "config" / "flags.example.env")
     assert validate(env) == []
     assert all("CHANGE_ME" in env[k] for k in ["FLAG_G1", "FLAG_G2", "FLAG_G3", "FLAG_FINAL"])
+    assert all("CHANGEME" in env[k] for k in ["CODE_V1", "CODE_V2", "CODE_V3", "CODE_V4"])

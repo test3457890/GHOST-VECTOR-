@@ -1,6 +1,6 @@
 # Running GHOST VECTOR on CTFd
 
-> Prototype / proof-of-concept demo by Stuff Studios. Tested end to end on **CTFd 3.8.9** with **ctfcli 0.1.8**, using both standard and dynamic scoring.
+> Prototype / proof-of-concept demo by Stuff Studios. Prefer pictures? See the [illustrated Setup Guide](SETUP_GUIDE.md). Tested end to end on **CTFd 3.8.9** with **ctfcli 0.1.8**, using both standard and dynamic scoring.
 
 GHOST VECTOR runs in two parts:
 

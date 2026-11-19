@@ -246,7 +246,8 @@ def generate_starmap(rng):
 
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    rng = random.Random(SEED)
+    # Seeded PRNG on purpose: same SEED must rebuild the same puzzle. Not used for secrets.
+    rng = random.Random(SEED)  # nosec B311
     generate_ghost(rng)
     generate_vector(rng)
     generate_starmap(rng)

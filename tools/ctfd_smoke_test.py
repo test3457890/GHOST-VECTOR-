@@ -2,7 +2,7 @@
 """End-to-end smoke test: plays GHOST VECTOR exactly like a player would.
 
 It registers a throwaway player on your CTFd, downloads the challenge files
-from CTFd, solves them with solutions/solve_all.py, submits every flag,
+from CTFd, solves them with the staff-pack solver, submits every flag,
 checks prerequisites and hint costs, then completes HANDSHAKE.SYS on the
 terminal and submits the FINAL flag. Run it after importing the challenges
 and before the event. Delete the "smoketest-..." user from CTFd afterwards.
@@ -15,12 +15,17 @@ Usage:
 
 Needs: pip install requests pillow
 Exit code 0 means every check passed.
+
+The solve-from-file checks use the reference solver, which lives in the
+encrypted staff pack. Unlock it first (python3 tools/staff_vault.py unlock)
+to run them. While locked, those checks are skipped and the flags from your
+config are submitted directly, so CTFd itself is still fully tested.
 """
 
 import argparse
 import re
 import secrets
-import subprocess
+import subprocess  # nosec B404
 import sys
 import tempfile
 from pathlib import Path
@@ -31,8 +36,15 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 from build_ctfd import load_env  # noqa: E402
 
+SOLVER = ROOT / "staff-unlocked" / "solvers" / "solve_all.py"
 PASS, FAIL = "PASS", "FAIL"
 results = []
+skipped = []
+
+
+def skip(name):
+    skipped.append(name)
+    print(f"[SKIP] {name}  (staff pack locked)")
 
 
 def check(name, ok, detail=""):
@@ -131,16 +143,20 @@ def main():
     check("Phase 2 files download after G1",
           (tmp / "vector_telemetry.csv").exists() and (tmp / "starmap.png").exists())
 
-    out = subprocess.run([sys.executable, str(ROOT / "solutions" / "solve_all.py"), str(tmp)],
-                         capture_output=True, text=True, cwd=tmp).stdout
-    solved = dict(line.split(" ", 1) for line in out.strip().splitlines() if " " in line)
-    check("solver recovers G1 from CTFd file", solved.get("G1") == env["FLAG_G1"])
-    check("solver recovers G2 from CTFd file", solved.get("G2") == env["FLAG_G2"])
-    check("solver recovers G3 from CTFd file", solved.get("G3") == env["FLAG_G3"])
-    check("solver recovers V1", solved.get("V1") == env["CODE_V1"])
-    check("solver recovers V2", solved.get("V2") == env["CODE_V2"])
-    check("solver recovers V4", solved.get("V4") == env["CODE_V4"])
-    check("starmap reveal written for V3", (tmp / "starmap_revealed.png").exists())
+    expect = {"G1": env["FLAG_G1"], "G2": env["FLAG_G2"], "G3": env["FLAG_G3"],
+              "V1": env["CODE_V1"], "V2": env["CODE_V2"], "V4": env["CODE_V4"]}
+    if SOLVER.exists():
+        out = subprocess.run([sys.executable, str(SOLVER), str(tmp)],  # nosec B603
+                             capture_output=True, text=True, cwd=tmp).stdout
+        solved = dict(line.split(" ", 1) for line in out.strip().splitlines() if " " in line)
+        for k, v in expect.items():
+            check(f"solver recovers {k} from the file CTFd serves", solved.get(k) == v)
+        check("starmap reveal written for V3", (tmp / "starmap_revealed.png").exists())
+    else:
+        solved = expect
+        for k in expect:
+            skip(f"solver recovers {k} from the file CTFd serves")
+        skip("starmap reveal written for V3")
 
     for n, f in [("G2 Clock Drift", solved.get("G2")), ("G3 Thermal Whisper", solved.get("G3")),
                  ("V1 SYNC", solved.get("V1")), ("V2 VECTOR", "AstroSec{" + str(solved.get("V2")) + "}"),
@@ -169,7 +185,8 @@ def main():
     check("final score is correct", p.score() == total, f"{p.score()} of {total}")
 
     passed = sum(results)
-    print(f"\n{passed}/{len(results)} checks passed. Remember to delete user {name} in CTFd.")
+    extra = f", {len(skipped)} skipped (unlock the staff pack to run them)" if skipped else ""
+    print(f"\n{passed}/{len(results)} checks passed{extra}. Remember to delete user {name} in CTFd.")
     sys.exit(0 if passed == len(results) else 1)
 
 
