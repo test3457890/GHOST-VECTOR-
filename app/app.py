@@ -25,6 +25,8 @@ from flask import (Flask, abort, jsonify, redirect, render_template,
 DATA_DIR = os.environ.get("OUTPUT_DIR", "/app/data")
 PHASE2_GATE = os.environ.get("PHASE2_GATE", "gated").lower()  # gated | open
 PRIZE_KEY_HASH = os.environ.get("PRIZE_KEY_HASH", "").strip().lower()
+# Shown only after a correct master coordinate. Players submit it to CTFd.
+FLAG_FINAL = os.environ.get("FLAG_FINAL", "").strip()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
@@ -134,9 +136,12 @@ def transmit():
                        "configured the master coordinate.")
     coord = (request.get_json(silent=True) or {}).get("coordinate", "")
     if hmac.compare_digest(sha(coord), PRIZE_KEY_HASH):
-        return jsonify(ok=True, message=(
-            "MASTER COORDINATE ACCEPTED. GHOST-01 IS COMING HOME. "
-            "Show this screen to the judge to complete verification."))
+        msg = "MASTER COORDINATE ACCEPTED. GHOST-01 IS COMING HOME."
+        if FLAG_FINAL:
+            msg += " Submit this flag to the scoreboard: " + FLAG_FINAL
+        else:
+            msg += " Show this screen to the judge to complete verification."
+        return jsonify(ok=True, message=msg, flag=FLAG_FINAL or None)
     return jsonify(ok=False, message="COORDINATE REJECTED. Check your slate.")
 
 

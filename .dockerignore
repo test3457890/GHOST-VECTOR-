@@ -10,3 +10,9 @@ setup.sh
 __pycache__/
 *.pyc
 staff-private/
+tests/
+solutions/
+ctfd/
+.github/
+requirements-dev.txt
+.pytest_cache/

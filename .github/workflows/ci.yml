@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest -v
+
+  end-to-end:
+    name: Docker build + real CTFd end-to-end
+    runs-on: ubuntu-latest
+    needs: tests
+    env:
+      COORD: GV-CI-0000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt ctfcli
+
+      - name: Configure test flags
+        run: |
+          cp config/flags.example.env config/flags.env
+          HASH=$(python -c "import hashlib,os;print(hashlib.sha256(os.environ['COORD'].encode()).hexdigest())")
+          sed -i "s/^PRIZE_KEY_HASH=.*/PRIZE_KEY_HASH=$HASH/" config/flags.env
+
+      - name: Build and start the terminal container
+        run: |
+          ./setup.sh
+          for i in $(seq 1 30); do curl -sf localhost:8080/health && break; sleep 2; done
+          curl -sf localhost:8080/health
+          docker ps
+
+      - name: Start a blank CTFd
+        run: |
+          docker run -d --name ctfd -p 8000:8000 ctfd/ctfd:latest
+          for i in $(seq 1 60); do curl -sf -o /dev/null localhost:8000/setup && break; sleep 3; done
+          python tests/ci/ctfd_first_setup.py http://localhost:8000 token.txt
+
+      - name: Build the CTFd pack and import it with ctfcli
+        run: |
+          python tools/build_ctfd.py
+          cd ctfd/build
+          mkdir -p .ctf
+          printf "[config]\nurl = http://localhost:8000\naccess_token = %s\n\n[challenges]\n" "$(cat ../../token.txt)" > .ctf/config
+          for d in 0*/; do ctf challenge lint "$d"; ctf challenge install "$d"; done
+
+      - name: Play the whole CTF as a player
+        run: python tools/ctfd_smoke_test.py --ctfd http://localhost:8000 --terminal http://localhost:8080 --coordinate "$COORD"
+
+      - name: Logs on failure
+        if: failure()
+        run: |
+          docker logs ghost-vector-ctf || true
+          docker logs ctfd | tail -50 || true
