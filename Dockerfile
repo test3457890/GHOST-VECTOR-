@@ -1,5 +1,8 @@
 FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 OUTPUT_DIR=/app/data PORT=8080
+# The base image advertises its bundled setuptools in an env var. We remove setuptools
+# below, so clear the stale metadata too (otherwise image scanners still report it).
+ENV PYTHON_SETUPTOOLS_VERSION= PYTHON_PIP_VERSION=
 WORKDIR /app
 # Pull in the latest Debian security fixes (the image scan in CI fails on fixable HIGH/CRITICAL).
 RUN apt-get update && apt-get upgrade -y --no-install-recommends \
