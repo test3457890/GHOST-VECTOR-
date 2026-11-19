@@ -45,7 +45,7 @@ nano config/flags.env
 ./setup.sh
 ```
 
-Open `http://YOUR-HOST:8080`. You should see the Phase 1 page:
+Open `http://localhost:8080` on the terminal host. By default, other machines cannot connect. For an event on an isolated network, set `HOST_BIND_IP` to the target's private address as shown in the [Deployment Guide](DEPLOYMENT.md#4-launch), then verify the player-facing `TERMINAL_URL` from a player machine. You should see the Phase 1 page:
 
 ![Recovery terminal, Phase 1](images/terminal-phase1.png)
 
