@@ -23,9 +23,11 @@ nano config/flags.env
 |---|---|
 | `FLAG_G1`, `FLAG_G2`, `FLAG_G3` | Phase 1 flags in `AstroSec{...}` format |
 | `CODE_V1` to `CODE_V4` | Phase 2 marker codes. `CODE_V2` may only use A to Z, 0 to 9 and `_` because it's sent as Morse |
+| `FLAG_FINAL` | Flag shown on HANDSHAKE.SYS after a correct master coordinate, for players to submit to CTFd. Leave it blank for judge-only scoring |
 | `PRIZE_KEY_HASH` | SHA256 of the master coordinate (step 3). Leave it blank and the final transmitter stays offline |
+| `TERMINAL_URL` | The terminal's address as players will see it. It's used in the CTFd FINAL challenge |
 | `SEED` | Changes where the data is hidden. Use a new seed for each event |
-| `PHASE2_GATE` | `gated` (a Phase 1 flag unlocks Phase 2) or `open` |
+| `PHASE2_GATE` | `open` (default, best with CTFd) or `gated` (a Phase 1 flag submitted on the terminal unlocks Phase 2, for use without CTFd) |
 | `SECRET_KEY` | Long random string used to sign sessions |
 | `REGENERATE` | Set to `1` for one start to rebuild the data |
 
@@ -51,6 +53,9 @@ Open `http://localhost:8080` (or `http://<host-ip>:8080` from other machines). T
 
 ## 5. Changing flags or seed later
 
+Rebuild the CTFd pack too (`python3 tools/build_ctfd.py`, then `ctf challenge sync`), so the files players download match the terminal.
+
+
 Challenge data is generated **once** and kept in a Docker volume. After you change flags or the seed:
 
 ```bash
@@ -58,13 +63,18 @@ docker compose down -v
 docker compose up -d --build
 ```
 
-## 6. Pre-event checklist
+## 6. Connect to CTFd
 
-- [ ] `config/flags.env` has new flags, a new seed, a secret key and a prize key hash
-- [ ] Ran the staff solver against the live data and every flag matched
-- [ ] Tested the full flow in a private browser window: Phase 1, Phase 2, handshake, transmit
+Follow [CTFD_SETUP.md](CTFD_SETUP.md) to build the challenge pack and import it.
+
+## 7. Pre-event checklist
+
+- [ ] `config/flags.env` has new flags, a new `SEED`, `FLAG_FINAL`, a secret key and a prize key hash
+- [ ] Terminal reset after the config changes (`docker compose down -v && ./setup.sh`)
+- [ ] CTFd pack rebuilt from the same config and imported
+- [ ] `tools/ctfd_smoke_test.py` shows 32/32 checks passed, and the smoketest user is deleted
+- [ ] `TERMINAL_URL/health` loads from a player machine on the event network
 - [ ] Slate cards printed and handed to the judges
-- [ ] Repo set to private until the event ends
 
 ## Useful commands
 

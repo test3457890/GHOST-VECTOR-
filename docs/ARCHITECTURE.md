@@ -1,5 +1,18 @@
 # Architecture
 
+## With CTFd (recommended)
+
+```
+config/flags.env ──┬──► tools/build_ctfd.py ──► ctfd/build/*/challenge.yml + files ──► CTFd (ctfcli)
+                   │            (runs the same generator, same SEED = identical files)
+                   └──► Docker terminal ──► generator.py ──► /app/data
+                                         └─► HANDSHAKE.SYS ──► reveals FLAG_FINAL ──► player submits to CTFd
+```
+
+CTFd owns accounts, flag checks, hints, prerequisites and the scoreboard. The terminal owns the story and the judge-verified final stage.
+
+## Terminal internals
+
 ```
 Browser ──> Flask app (gunicorn, port 8080)
               │

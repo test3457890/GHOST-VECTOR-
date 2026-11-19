@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.0 (2026-11-18)
+
+- **CTFd integration:** `tools/build_ctfd.py` builds a ctfcli pack (8 challenges, hints with costs, prerequisites, files, optional dynamic scoring) and a manual entry sheet.
+- **FINAL is scoreable in CTFd:** HANDSHAKE.SYS reveals `FLAG_FINAL` after a correct master coordinate. Leave it blank for judge-only scoring.
+- **Player smoke test:** `tools/ctfd_smoke_test.py` plays the whole CTF against a live CTFd (32 checks).
+- **41-test pytest suite** and **GitHub Actions CI**, which builds the Docker image, imports into a real CTFd and plays it end to end.
+- `PHASE2_GATE` now defaults to `open`, because CTFd handles unlocking.
+- New docs: CTFd Setup and Testing. Updated README, Deployment, Architecture, Player Briefing, Hints and Walkthrough.
+
 ## 1.1.0 (2026-11-18)
 
 - Added the Learning Guide: concepts, tools, practice exercises, learning path and instructor notes.

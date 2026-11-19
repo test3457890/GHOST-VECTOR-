@@ -128,7 +128,7 @@ You can run GHOST VECTOR alone to learn. No event is needed.
 ./setup.sh
 ```
 
-- In `config/flags.env`, set `PHASE2_GATE=open` to open both phases at once.
+- With the default `PHASE2_GATE=open`, both phases download straight from the terminal at `http://localhost:8080`.
 - Change `SEED` and the flags, then run `docker compose down -v && ./setup.sh` to get a fresh puzzle you haven't seen.
 - Check your answers with [the reference solver](../solutions/solve_all.py) only after you've tried.
 

@@ -1,6 +1,6 @@
 # Hint Book (player safe)
 
-Each hint is stronger than the one before. Release them on a timer or for a point cost.
+Each hint is stronger than the one before. In CTFd the first is free, the second costs 10% of the challenge's points and the third costs 25% (set by `tools/build_ctfd.py`).
 
 ## G1: Power Loss
 1. A satellite with a working downlink shouldn't report a battery that is completely empty.
