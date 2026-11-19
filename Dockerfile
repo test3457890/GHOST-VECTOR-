@@ -5,7 +5,11 @@ WORKDIR /app
 RUN apt-get update && apt-get upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 COPY app/requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
+# Build tools are not needed at runtime, so remove them (smaller attack surface).
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt \
+    && pip uninstall -y setuptools wheel \
+    && find /usr/local/lib -depth \( -name 'setuptools*' -o -name 'wheel-*' \) -exec rm -rf {} + \
+    && rm -rf /usr/local/lib/python3.12/ensurepip/_bundled
 COPY app/ /app/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh && useradd -m ctf && mkdir -p /app/data && chown -R ctf /app/data
