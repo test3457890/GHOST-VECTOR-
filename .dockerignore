@@ -16,3 +16,4 @@ ctfd/
 .github/
 requirements-dev.txt
 .pytest_cache/
+.trivyignore

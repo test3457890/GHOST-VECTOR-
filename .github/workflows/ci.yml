@@ -82,10 +82,16 @@ jobs:
           curl -sI localhost:8080/ | grep -qi "x-frame-options: DENY"
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/download/.hashes.json)" = "404"
 
+      - name: Prove build tools are not in the runtime image
+        run: |
+          docker run --rm --entrypoint python ghost-vector-ctf:local -c \
+            "import importlib.util as u, sys; bad=[m for m in ('setuptools','wheel','pkg_resources') if u.find_spec(m)]; print('present:', bad); sys.exit(1 if bad else 0)"
+
       - name: Scan the image for known vulnerabilities (Trivy)
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/out" aquasec/trivy:latest \
-            image --severity CRITICAL,HIGH --ignore-unfixed --no-progress -f json -o /out/trivy.json ghost-vector-ctf:local
+            image --severity CRITICAL,HIGH --ignore-unfixed --no-progress --ignorefile /out/.trivyignore \
+            -f json -o /out/trivy.json ghost-vector-ctf:local
           jq -r '.Results[] | .Target as $t | (.Vulnerabilities // [])[] | "\(.Severity) \(.VulnerabilityID) \(.PkgName) \(.InstalledVersion) -> \(.FixedVersion)  [\($t) \(.PkgPath // "")]"' trivy.json | tee trivy.txt
           test ! -s trivy.txt
 

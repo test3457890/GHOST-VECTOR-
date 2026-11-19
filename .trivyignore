@@ -1,0 +1,5 @@
+# CVE-2025-47273 (setuptools path traversal, PackageIndex).
+# Reported against the python:3.12-slim base image's build history, not a file in
+# our image: setuptools is uninstalled and deleted in the Dockerfile, and CI proves
+# it with the "setuptools is not in the image" check before this scan runs.
+CVE-2025-47273
