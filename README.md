@@ -32,6 +32,8 @@ Yes. Every push runs the [CI workflow](.github/workflows/ci.yml):
 
 You can run the same player test against your own CTFd before an event. See [docs/TESTING.md](docs/TESTING.md).
 
+The [owner Windows and event VM checklist](docs/Windows%20Test%20Checklist.md) covers the manual setup, interface, judge flow, and isolation checks still needed on the owner's computer.
+
 ## The challenges
 
 | ID | Category | Skill | Points | Unlocks after |

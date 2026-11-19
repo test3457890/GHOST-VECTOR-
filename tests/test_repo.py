@@ -8,9 +8,13 @@ DASHES = {chr(0x2014), chr(0x2013)}  # em dash and en dash
 TEXT = {".py", ".md", ".html", ".css", ".yml", ".yaml", ".env", ".sh", ".txt", ""}
 
 
+def tracked_files():
+    out = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    return [p for p in out.split("\0") if p]
+
+
 def repo_files():
-    out = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True).stdout
-    return [ROOT / p for p in out.split() if (ROOT / p).suffix in TEXT and (ROOT / p).is_file()]
+    return [ROOT / p for p in tracked_files() if (ROOT / p).suffix in TEXT and (ROOT / p).is_file()]
 
 
 def test_no_em_or_en_dashes():
@@ -19,13 +23,13 @@ def test_no_em_or_en_dashes():
 
 
 def test_real_config_not_tracked():
-    tracked = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True).stdout
-    assert "config/flags.env" not in tracked.split()
-    assert "ctfd/build" not in tracked
+    tracked = tracked_files()
+    assert "config/flags.env" not in tracked
+    assert not any(p.startswith("ctfd/build/") for p in tracked)
 
 
 def test_spoilers_not_tracked_in_plain_text():
-    tracked = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True).stdout.split()
+    tracked = tracked_files()
     assert "docs/WALKTHROUGH.md" not in tracked
     assert not any(p.startswith(("solutions/", "staff-unlocked/")) for p in tracked)
     assert "staff/ghost-vector-staff.7z" in tracked
