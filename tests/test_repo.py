@@ -4,6 +4,7 @@ import subprocess
 from conftest import ROOT
 from build_ctfd import load_env, validate
 
+DASHES = {chr(0x2014), chr(0x2013)}  # em dash and en dash
 TEXT = {".py", ".md", ".html", ".css", ".yml", ".yaml", ".env", ".sh", ".txt", ""}
 
 
@@ -13,7 +14,7 @@ def repo_files():
 
 
 def test_no_em_or_en_dashes():
-    bad = [str(p) for p in repo_files() if "—" in p.read_text() or "–" in p.read_text()]
+    bad = [str(p) for p in repo_files() if DASHES & set(p.read_text())]
     assert not bad, bad
 
 
