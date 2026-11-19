@@ -14,6 +14,14 @@ GHOST VECTOR is a space-themed Capture The Flag event built for **CTFd**. A lost
 2. **Phase 2, Silent Vector:** four navigation markers hidden in a radio log and a star map (pattern recognition, Morse timing, image steganography, primes and modular arithmetic).
 3. **Final, HANDSHAKE.SYS:** players lock in their markers, explain their methods to a **judge**, get a **printed alignment slate**, and build the master coordinate by hand. The rule exists only on paper, so a player can't finish by handing the files to an AI tool.
 
+## Screenshots
+
+Captured from an isolated copy of the recovery terminal. The Phase 2 previews use the app's open demo setting. The gallery omits completed answers and submissions. [View all 4 screenshots](docs/screenshots/README.md).
+
+| Ghost Signal player briefing | Blank Handshake terminal |
+| --- | --- |
+| [![Ghost Signal player briefing](docs/screenshots/ghost-signal-briefing.webp)](docs/screenshots/ghost-signal-briefing.webp) | [![Blank Handshake terminal](docs/screenshots/handshake-terminal.webp)](docs/screenshots/handshake-terminal.webp) |
+
 ## Is it tested?
 
 Yes. Every push runs the [CI workflow](.github/workflows/ci.yml):
