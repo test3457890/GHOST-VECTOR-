@@ -10,4 +10,4 @@ if [ ! -f config/flags.env ]; then
   echo "Created config/flags.env from the example. Edit it before a real event."
 fi
 $DC up -d --build
-echo "GHOST VECTOR is starting at http://localhost:${HOST_PORT:-8080}"
+echo "GHOST VECTOR is starting at http://${HOST_BIND_IP:-127.0.0.1}:${HOST_PORT:-8080}"

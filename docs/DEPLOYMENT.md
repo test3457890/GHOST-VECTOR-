@@ -52,7 +52,7 @@ Flags are checked without regard to case.
 ./setup.sh
 ```
 
-Open `http://localhost:8080` (or `http://<host-ip>:8080` from other machines). To use another port, run `HOST_PORT=9000 ./setup.sh`.
+By default, open `http://localhost:8080` on the terminal host; Compose binds only `127.0.0.1:8080`. For an organizer-controlled event network, set `HOST_BIND_IP` to the host's approved private interface address. For example, if that host is assigned `10.0.0.5`, run `HOST_BIND_IP=10.0.0.5 ./setup.sh` and verify `docker compose port ghost-vector 8080` shows that address. Replace the example IP with the actual assigned address, verify the URL from a player machine, and keep the service off public networks. Supply `HOST_BIND_IP` again whenever recreating the container. To change the port for local use, run `HOST_PORT=9000 ./setup.sh`.
 
 ## 5. Changing flags or seed later
 
@@ -63,7 +63,7 @@ Challenge data is generated **once** and kept in a Docker volume. After you chan
 
 ```bash
 docker compose down -v
-docker compose up -d --build
+docker compose up -d --build   # set HOST_BIND_IP here too if using an event interface
 ```
 
 ## 6. Connect to CTFd

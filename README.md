@@ -28,9 +28,11 @@ Yes. Every push runs the [CI workflow](.github/workflows/ci.yml):
 
 - **Security scans:** bandit, pip-audit, a Trivy image scan, a spoiler guard, and a live check that the container is hardened. See [docs/SECURITY.md](docs/SECURITY.md).
 - **52 unit tests:** the generator, the terminal (including security headers, rate limits and input caps), the CTFd pack builder and the repo rules.
-- **End to end:** builds the Docker image, starts a real **CTFd**, imports all 8 challenges with ctfcli, then plays the whole CTF as a player. That covers downloading the files from CTFd, solving them, submitting every flag, checking that locked challenges unlock, checking hint costs, doing HANDSHAKE.SYS and checking the final score. **32 checks, all passing.**
+- **End to end:** builds the Docker image, starts a real **CTFd**, imports all 8 challenges with ctfcli, then plays the whole CTF as a player. That covers downloading the files from CTFd, solving them, submitting every flag, checking that locked challenges unlock, checking hint costs, doing HANDSHAKE.SYS and checking the final score. **Up to 32 checks:** seven reference-solver checks need the optional staff-pack secret and otherwise report SKIP; the other 25 still run.
 
 You can run the same player test against your own CTFd before an event. See [docs/TESTING.md](docs/TESTING.md).
+
+The [owner Windows and event VM checklist](docs/Windows%20Test%20Checklist.md) covers the manual setup, interface, judge flow, and isolation checks still needed on the owner's computer.
 
 ## The challenges
 
@@ -54,12 +56,14 @@ git clone https://github.com/test3457890/GHOST-VECTOR-.git
 cd GHOST-VECTOR-
 cp config/flags.example.env config/flags.env   # then change every CHANGE_ME value
 python3 tools/set_prize_key.py                  # paste the hash into config/flags.env
-./setup.sh                                      # starts the recovery terminal on :8080
+./setup.sh                                      # starts locally on 127.0.0.1:8080
 python3 tools/build_ctfd.py                     # builds the CTFd challenge pack
 cd ctfd/build && mkdir -p .ctf && printf "[config]\nurl = https://YOUR-CTFD\naccess_token = YOUR_TOKEN\n\n[challenges]\n" > .ctf/config
 for d in 0*/; do ctf challenge install "$d"; done
 cd ../.. && python3 tools/ctfd_smoke_test.py --ctfd https://YOUR-CTFD --terminal http://YOUR-HOST:8080 --coordinate YOUR-COORDINATE
 ```
+
+The terminal binds to loopback by default. For a scored event, set `HOST_BIND_IP` to the target's approved private interface address when starting it, and check the CTFd `TERMINAL_URL` from a player machine. See [Deployment](docs/DEPLOYMENT.md#4-launch) for an example. Do not expose the terminal to the open internet.
 
 Step by step with screenshots: **[docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md)**. Entering challenges by hand without ctfcli: **[docs/CTFD_SETUP.md](docs/CTFD_SETUP.md)**.
 
